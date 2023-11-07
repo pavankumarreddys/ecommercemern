@@ -2,43 +2,42 @@ import express from 'express';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 import connectDb from './config/db.js';
-import authRoutes from './routes/authRoute.js'
-import cors from 'cors'
-import path from 'path'
-import {fileURLToPath} from 'url'
-//configure env
-dotenv.config();
+import authRoutes from './routes/authRoute.js';
+import cors from 'cors';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
-//database config
-connectDb();
-
-
-//esmodulefix
+// Get the current file's directory name using import.meta.url
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-//rest object 
+// Configure environment variables
+dotenv.config();
+
+// Database configuration
+connectDb();
+
+// Create the express app
 const app = express();
 
-//middlewares
-app.use(cors())
-app.use(express.json())
-app.use(morgan('dev'))
-app.use(express.static(path.join(__dirname,'./client/build')))
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(morgan('dev'));
+app.use(express.static(path.join(__dirname, './client/build')));
 
-//routes
+// Routes
 app.use('/api/v1/auth', authRoutes);
 
-// rest api 
-app.use('*',function(req,resp){
-    resp.sendFile(path.join(__dirname,'./client/build/index.html'))
+// Serve the React app's HTML file
+app.use('*', function (req, res) {
+  res.sendFile(path.join(__dirname, './client/build/index.html'));
+});
 
-})
-
-//PORT 
+// Define the PORT
 const PORT = process.env.PORT || 8080;
 
-//run listen
-app.listen(PORT,()=>{
-    console.log(`this is running on ${process.env.DEV_mode} mode ${PORT} PORT`)
-})
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server is running on ${process.env.DEV_mode} mode, port ${PORT}`);
+});
