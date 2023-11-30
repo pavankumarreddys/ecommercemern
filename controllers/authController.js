@@ -1,11 +1,13 @@
 import userModel from "../models/userModel.js";
+import cartModel from "../models/cartModel.js";
+
 import { comparePassword, hashPassword } from "../helpers/authHelper.js";
 import JWT from 'jsonwebtoken'
 
 //REGISTER
 export const registerController = async(req,res) => {
     try{
-        const {name,email,password,phone,address} = req.body
+        const {name,email,password,phone} = req.body
         //validations 
         if(!name){
             return res.send({message:'Name is Required'})
@@ -16,12 +18,7 @@ export const registerController = async(req,res) => {
         if(!password){
             return res.send({message:'Password is Required'})
         }
-        if(!phone){
-            return res.send({message:'Phone Number is Required'})
-        }
-        if(!address){
-            return res.send({message:'Address is Required'})
-        }
+        
 
         //check user
         const existingUser = await userModel.findOne({email})
@@ -36,7 +33,7 @@ export const registerController = async(req,res) => {
 
         //register user
         const hashedPassword = await hashPassword(password)
-        const user = await new userModel({name,email,phone,address,password:hashedPassword}).save()
+        const user = await new userModel({name,email,phone,password:hashedPassword}).save()
 
         res.status(201).send({
             success:true,
@@ -89,15 +86,14 @@ export const loginController = async (req,res)=>{
             expiresIn:"7d",
         });
 
+        const userid = user._id
+         const cartData = await cartModel.find({userid});
+
         res.status(200).send({
             success:200,
             message:"Login Successfully",
-            user:{
-                name:user.name,
-                phone:user.phone,
-                email:user.email,
-                address:user.address
-            },
+            user,
+            cartData,
             token 
         })
 
@@ -110,6 +106,57 @@ export const loginController = async (req,res)=>{
         })
     }
 }
+
+// FORGOT PASSWORD
+export const forgotPassword = async (req,res)=>{
+    try{
+        const {email,password} = req.body 
+
+        //validation
+        if(!email || !password){
+            return res.status(400).send({
+                success:false,
+                message:"Invalid email or password",  
+            })
+        }
+
+        //check user
+        const findUser = await userModel.findOne({email})
+
+        if(findUser){
+            // converting password to hashed password
+            const hashedPassword = await hashPassword(password)
+
+            // Update the userPassword
+            const updatedUserPassword = await userModel.findOneAndUpdate(
+                {email},
+                { $set: { password: hashedPassword } },
+                { new: true } // Return the updated document
+            );
+
+            res.status(200).send({
+                success:200,
+                message:"Password Updated Successfully",
+            
+            })
+        }else{
+            res.status(400).send({
+                success:false,
+                message:"Email is not registered",  
+            })
+        }
+
+
+    }catch(error){
+        console.log("error",error)
+        res.status(500).send({
+            success:false,
+            message:"Error in changing Password",
+            error
+        })
+    }
+}
+
 
 //JWT test
 export const testController = async (req,res)=>{

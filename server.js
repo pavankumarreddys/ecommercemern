@@ -1,11 +1,15 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
-import connectDb from './config/db.js';
-import authRoutes from './routes/authRoute.js';
+import path from 'path';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
-import path from 'path';
+
+import connectDb from './config/db.js';
+import authRoutes from './routes/authRoute.js';
+import cartRoutes from './routes/cartRoute.js'
+import productRoutes from './routes/productRoutes.js'
+import newProducuRoute from './routes/newProductRoute.js'
 
 // Get the current file's directory name using import.meta.url
 const __filename = fileURLToPath(import.meta.url);
@@ -28,6 +32,12 @@ app.use(express.static(path.join(__dirname, './client/build')));
 
 // Routes
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/cart', cartRoutes); //my mart data
+app.use('/api/v1/userCart', cartRoutes)
+app.use("/api/v1/product", productRoutes);
+app.use("/api/v1/newproduct", newProducuRoute); //admin adding new product
+
+
 
 // Serve the React app's HTML file
 app.use('*', function (req, res) {

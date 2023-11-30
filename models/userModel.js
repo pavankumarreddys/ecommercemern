@@ -17,11 +17,6 @@ const userSchema = new mongoose.Schema({
     },
     phone:{
         type:String,
-        required:true
-    },
-    address:{
-        type:String,
-        required:true
     },
     role:{
         type:Number,
@@ -30,4 +25,6 @@ const userSchema = new mongoose.Schema({
 
 },{timestamps:true})
 
+
+// users is database tale
 export default mongoose.model('users',userSchema)
